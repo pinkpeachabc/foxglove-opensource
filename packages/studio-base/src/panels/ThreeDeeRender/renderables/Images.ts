@@ -9,7 +9,7 @@ import { MultiMap, filterMap } from "@foxglove/den/collection";
 import { PinholeCameraModel } from "@foxglove/den/image";
 import Logger from "@foxglove/log";
 import { toNanoSec } from "@foxglove/rostime";
-import { CameraCalibration, CompressedImage, RawImage } from "@foxglove/schemas";
+import { CameraCalibration, CompressedImage, RawImage,CompressedVideo } from "@foxglove/schemas";
 import { SettingsTreeAction, SettingsTreeFields } from "@foxglove/studio";
 import { ALL_SUPPORTED_IMAGE_SCHEMAS } from "@foxglove/studio-base/panels/ThreeDeeRender/renderables/ImageMode/ImageMode";
 
@@ -21,6 +21,7 @@ import {
 import { ALL_CAMERA_INFO_SCHEMAS, AnyImage } from "./Images/ImageTypes";
 import {
   normalizeCompressedImage,
+  normalizeCompressedVideo,
   normalizeRawImage,
   normalizeRosCompressedImage,
   normalizeRosImage,
@@ -33,6 +34,7 @@ import { SettingsTreeEntry } from "../SettingsManager";
 import {
   CAMERA_CALIBRATION_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES,
+  COMPRESSED_VIDEO_DATATYPES,
   RAW_IMAGE_DATATYPES,
 } from "../foxglove";
 import {
@@ -41,6 +43,7 @@ import {
   CompressedImage as RosCompressedImage,
   IMAGE_DATATYPES as ROS_IMAGE_DATATYPES,
   COMPRESSED_IMAGE_DATATYPES as ROS_COMPRESSED_IMAGE_DATATYPES,
+  COMPRESSED_VIDEO_DATATYPES as ROS_COMPRESSED_VIDEO_DATATYPES,
   CAMERA_INFO_DATATYPES,
 } from "../ros";
 import { BaseSettings, PRECISION_DISTANCE } from "../settings";
@@ -118,6 +121,14 @@ export class Images extends SceneExtension<ImageRenderable> {
       },
       {
         type: "schema",
+        schemaNames: ROS_COMPRESSED_VIDEO_DATATYPES,
+        subscription: {
+          handler: this.#handleRosCompressedVideo,
+          filterQueue: onlyLastByTopicMessage,
+        },
+      },
+      {
+        type: "schema",
         schemaNames: RAW_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleRawImage,
@@ -129,6 +140,14 @@ export class Images extends SceneExtension<ImageRenderable> {
         schemaNames: COMPRESSED_IMAGE_DATATYPES,
         subscription: {
           handler: this.#handleCompressedImage,
+          filterQueue: onlyLastByTopicMessage,
+        },
+      },
+      {
+        type: "schema",
+        schemaNames: COMPRESSED_VIDEO_DATATYPES,
+        subscription: {
+          handler: this.#handleCompressedVideo,
           filterQueue: onlyLastByTopicMessage,
         },
       },
@@ -292,12 +311,20 @@ export class Images extends SceneExtension<ImageRenderable> {
     this.handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
   };
 
+  #handleRosCompressedVideo = (messageEvent: PartialMessageEvent<CompressedVideo>): void => {
+    this.handleImage(messageEvent, normalizeRosCompressedImage(messageEvent.message));
+  };
+
   #handleRawImage = (messageEvent: PartialMessageEvent<RawImage>): void => {
     this.handleImage(messageEvent, normalizeRawImage(messageEvent.message));
   };
 
   #handleCompressedImage = (messageEvent: PartialMessageEvent<CompressedImage>): void => {
     this.handleImage(messageEvent, normalizeCompressedImage(messageEvent.message));
+  };
+
+  #handleCompressedVideo = (messageEvent: PartialMessageEvent<CompressedVideo>): void => {
+    this.handleImage(messageEvent, normalizeCompressedVideo(messageEvent.message));
   };
 
   protected handleImage = (messageEvent: PartialMessageEvent<AnyImage>, image: AnyImage): void => {

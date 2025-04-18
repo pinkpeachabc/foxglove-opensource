@@ -278,6 +278,12 @@ export type CompressedImage = {
   data: Uint8Array;
 };
 
+export type CompressedVideo= {
+  header: Header;
+  format: string;
+  data: Uint8Array;
+};
+
 export type JointState = {
   header: Header;
   name: string[];
@@ -335,6 +341,9 @@ addRosDataType(IMAGE_DATATYPES, "sensor_msgs/Image");
 
 export const COMPRESSED_IMAGE_DATATYPES = new Set<string>();
 addRosDataType(COMPRESSED_IMAGE_DATATYPES, "sensor_msgs/CompressedImage");
+
+export const COMPRESSED_VIDEO_DATATYPES = new Set<string>();
+addRosDataType(COMPRESSED_VIDEO_DATATYPES, "sensor_interface_msgs/CompressedVideo");
 
 export const POLYGON_STAMPED_DATATYPES = new Set<string>();
 addRosDataType(POLYGON_STAMPED_DATATYPES, "geometry_msgs/PolygonStamped");

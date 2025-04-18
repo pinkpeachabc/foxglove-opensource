@@ -2,11 +2,11 @@
 // License, v2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/
 
-import { CompressedImage, RawImage } from "@foxglove/schemas";
+import { CompressedImage, RawImage, CompressedVideo } from "@foxglove/schemas";
 import { PartialMessage } from "@foxglove/studio-base/panels/ThreeDeeRender/SceneExtension";
 
 import { normalizeByteArray, normalizeHeader, normalizeTime } from "../../normalizeMessages";
-import { Image as RosImage, CompressedImage as RosCompressedImage } from "../../ros";
+import { Image as RosImage, CompressedImage as RosCompressedImage ,CompressedVideo as RosCompressedVideo} from "../../ros";
 
 function normalizeImageData(data: Int8Array): Int8Array;
 function normalizeImageData(data: PartialMessage<Uint8Array> | undefined): Uint8Array;
@@ -43,6 +43,17 @@ export function normalizeRosCompressedImage(
   };
 }
 
+
+export function normalizeRosCompressedVideo(
+  message: PartialMessage<RosCompressedVideo>,
+): RosCompressedVideo {
+  return {
+    header: normalizeHeader(message.header),
+    format: message.format ?? "",
+    data: normalizeByteArray(message.data),
+  };
+}
+
 export function normalizeRawImage(message: PartialMessage<RawImage>): RawImage {
   return {
     timestamp: normalizeTime(message.timestamp),
@@ -58,6 +69,18 @@ export function normalizeRawImage(message: PartialMessage<RawImage>): RawImage {
 export function normalizeCompressedImage(
   message: PartialMessage<CompressedImage>,
 ): CompressedImage {
+  return {
+    timestamp: normalizeTime(message.timestamp),
+    frame_id: message.frame_id ?? "",
+    format: message.format ?? "",
+    data: normalizeByteArray(message.data),
+  };
+}
+
+
+export function normalizeCompressedVideo(
+  message: PartialMessage<CompressedVideo>,
+): CompressedVideo {
   return {
     timestamp: normalizeTime(message.timestamp),
     frame_id: message.frame_id ?? "",
